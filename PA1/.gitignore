@@ -1,0 +1,7 @@
+#ignore execuitables
+#*[^.]*
+Baseline
+CalculateChunk
+Multitasking1
+Multitasking2
+Multithreading
