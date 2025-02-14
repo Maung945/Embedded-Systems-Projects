@@ -7,7 +7,7 @@ int main(int argc, char const *argv[]){
     unsigned long long int start = 0;
     unsigned long long int numChunk = 0;
     unsigned long long int end = 0;
-    unsigned long long int tempTotal = start + 1;
+    unsigned long long int tempTotal = 0;
     int total[20];
     int flag = 1;
 
@@ -19,6 +19,7 @@ int main(int argc, char const *argv[]){
     }
 
     end = start + numChunk;
+    tempTotal = start + 1;
 
     for(unsigned long long int j = tempTotal+1; j <= end; j++){
         if(j > 6000000000){

@@ -14,16 +14,8 @@ void convert(char arr[], int intArr[]);
 
 int main(int argc, char const *argv[]){
 
-    N = 100000000;
-    unsigned long long int numTasks = 2;
-    int total[20];
     int base = 10;
-    FILE *fp[numTasks];
-    char command[256];
-
-    void displayTest(int total1[], int total2[]);
-    
-    clock_t start, end;
+    unsigned long long int numTasks = 4;
 
     if (argc > 1){
         N = strtoull(argv[1], NULL, base);
@@ -32,6 +24,13 @@ int main(int argc, char const *argv[]){
     if(argc > 2){
         numTasks = atoi(argv[2]);
     }
+
+    int total[20];
+    FILE *fp[numTasks];
+    char command[256];
+    
+    clock_t start, end;
+
 
     unsigned long long int startValue[numTasks];
 
@@ -56,14 +55,6 @@ int main(int argc, char const *argv[]){
 
     CalculateChunk(startValue[numTasks - 1], total);
 
-    // unsigned long long int testEnd = startValue[numTasks - 1] + numChunk;
-
-    // printf("Parent calculation from %llu to %llu: ", startValue[numTasks - 1], testEnd-1);
-
-    // displaytest(total);
-
-    // printf("\n");
-
     int rec[20];
     int tempVal = 0;
 
@@ -73,15 +64,6 @@ int main(int argc, char const *argv[]){
         init(rec);
         fgets(testStr, 256, fp[i]);
         convert(testStr, rec);
-        // for(int j = 0; j < 20; j++){
-        //     // fscanf(fp[i], "%d", &tempVal);
-        //     fgets(testStr, 256, fp[i]);
-        //     // printf("TempValue: %d\n", tempVal);
-        //     printf("Teststr %d : ", j);
-        //     displaytest(testStr);
-        //     printf("\n");
-        //     rec[j] = tempVal;
-        // }
         bigAdd(total, rec);
         pclose(fp[i]);
     }
@@ -137,12 +119,6 @@ void display(double time, int total2[], unsigned long long int num ){
     printf("\n");
     printf("Time taken to calculate is %.5fs\n", time);
 }
-
-// void displaytest(int arr[]){
-//     for(int i = 0; i < 20; i++){
-//         printf("%d", arr[i]);
-//     }
-// }
 
 void convert(char arr[], int intArr[]){
     for(int i = 0; i < 20; i++){

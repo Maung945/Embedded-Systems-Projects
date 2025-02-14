@@ -16,17 +16,8 @@ void sendData(int data[], int fd[]);
 
 int main(int argc, char const *argv[]){
 
-    N = 100000000;
-    unsigned long long int numTasks = 2;
-    unsigned long long int total6B = 0;
-    int fd[numTasks - 1][2];
-    int total[20];
     int base = 10;
-    int taskTrigger = (log((double)numTasks)/log(2.0));
-    int task = 0;
-    int pids[taskTrigger];
-    
-    clock_t start, end;
+    unsigned long long int numTasks = 2;
 
     if (argc > 1){
         N = strtoull(argv[1], NULL, base);
@@ -35,6 +26,15 @@ int main(int argc, char const *argv[]){
     if(argc > 2){
         numTasks = atoi(argv[2]);
     }
+    
+    unsigned long long int total6B = 0;
+    int fd[numTasks - 1][2];
+    int total[20];
+    int taskTrigger = (log((double)numTasks)/log(2.0));
+    int task = 0;
+    int pids[taskTrigger];
+    
+    clock_t start, end;
 
     unsigned long long int startValue[numTasks];
 
