@@ -7,6 +7,7 @@ void bigAdd(int running[], int current[]);
 void display(double time, unsigned long long int total1, int total2[], unsigned long long int num);
 unsigned long long int calculate(unsigned long long int num, int t[]);
 void split(int arr[], unsigned long long int in);
+void init(int arr[]);
 
 int main(int argc, char const *argv[]){
 
@@ -63,32 +64,34 @@ void display(double time, unsigned long long int total1, int total2[], unsigned 
 
 unsigned long long int calculate(unsigned long long int num, int t[]){
     unsigned long long int total = 0;
+    int tempArr[20];
     for(unsigned long long int i = 0; i < num; i++){
         if(i > 6000000000){
              if(i == 6000000001){
                 split(t,total);
+                total = 0;
              } 
-            int tempArr[20];
-
+            init(tempArr);
             split(tempArr,i);
             bigAdd(t, tempArr);
-
         } else{
             total += i;
         }
     }
+
     return total;
 }
 
 void split(int arr[], unsigned long long int in){
     unsigned long long int temp = in;
-                int count = 0;
-                while (temp != 0){
-                    temp /= 10;
-                    count++;
-                }
-                for(int j = count - 1; j >= 0; j-- ){
+                for(int j = 19; j >= 0; j-- ){
                     arr[j] = in % 10;
                     in /= 10;
                 }
+}
+
+void init(int arr[]){
+    for (int i = 0; i < 20; i++){
+        arr[i] = 0;
+    }
 }
