@@ -13,7 +13,7 @@ This project consists of several C files each designed to handle specific aspect
 
 ### `multithreading.c`
 
-- Implements the computation using multithreading to utilize multiple CPU cores simultaneously.
+- Implements the computation using multithreading to utilize multiple threads simultaneously.
 - Demonstrates the use of POSIX threads to split the computation task among available processors.
 
 ### `multitasking1.c`
