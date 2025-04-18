@@ -57,6 +57,7 @@ int main(int argc, char* argv[]){
             getline(iss, type, '\t');
             procNum = stoi(process);
             addr = stoi(address);
+            type = type[0];
             //check the process list for the process that was read 
             for(int i = 0; i < processes.size(); i++){
                 if(procNum == processes.at(i).getName()){
@@ -137,8 +138,8 @@ void display(vector<Process> l, int pf, int args){
     }
 
     if (args > 2){
-        cout << "Page faults,Dirty writes,Total disk references" << endl;
+        cout << "Type,Page faults,Dirty writes,Total disk references" << endl;
     }
     
-    cout << pf << "," << dw << "," << disk << endl;
+    cout << "Random," << pf << "," << dw << "," << disk << endl;
 }
