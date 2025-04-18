@@ -77,6 +77,7 @@ int main(int argc, char* argv[]){
     } else {
         cout << "Unable to open file\n";
     }
+
     file.open(filename);
 
     //Read file
@@ -117,6 +118,14 @@ int main(int argc, char* argv[]){
             current = processes.at(index).getPage(vpn);
             current->access();
             int phy = current->getPhyAddr();
+            //Update the priority list
+            for(accessPriority &ea : priorityList){
+                if(ea.process == procNum && ea.virtPage == vpn){
+                    ea.access--;
+                    break;
+                }
+            }
+            sort(priorityList.begin(), priorityList.end(), compare);
             //Check the main memory for an empty page
             if(phy < 0){
                 pageFaults++;
@@ -147,6 +156,9 @@ int main(int argc, char* argv[]){
         file.close();
     } else {
         cout << "Unable to open file\n";
+    }
+    for(accessPriority ea : priorityList){
+        cout << "Process: " << ea.process << " Page: " << ea.virtPage << " Accesses: " << ea.access << endl;
     }
     display(processes, pageFaults, argc);
     return 0;
@@ -200,7 +212,7 @@ void display(vector<Process> l, int pf, int args){
         cout << "Type,Page faults,Dirty writes,Total disk references" << endl;
     }
     
-    cout << "Custom," << pf << "," << dw << "," << disk << endl;
+    cout << "CU," << pf << "," << dw << "," << disk << endl;
 }
 
 bool compare(accessPriority &a, accessPriority &b){
