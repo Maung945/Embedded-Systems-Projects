@@ -2,3 +2,4 @@
 ../Executibles/PER.o data1.txt >> ../Logs/data1.log
 ../Executibles/LRU.o data1.txt >> ../Logs/data1.log
 ../Executibles/FIFO.o data1.txt >> ../Logs/data1.log
+../Executibles/CU.o data1.txt >> ../Logs/data1.log

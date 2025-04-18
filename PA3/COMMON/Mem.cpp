@@ -11,6 +11,14 @@ MemUnit::MemUnit(){
     virt = -1;
 }
 
+void MemUnit::setProcess(int p){
+    pro = p;
+}
+
+int MemUnit::getProcess(){
+    return pro;
+}
+
 void MemUnit::setDirty(){
     dirty = true;
 }
@@ -73,11 +81,15 @@ clock_t MemUnit::getTime(){
 void MemUnit::setVirtual(int x){
     virt = x;
 }
+int MemUnit::getVirtual(){
+    return virt;
+}
 
 Process::Process(int x){
     procName = x;
     for(int i = 0; i < 128; i++){
         pageTable[i].setVirtual(i);
+        pageTable[i].setProcess(procName);
     }
 }
 

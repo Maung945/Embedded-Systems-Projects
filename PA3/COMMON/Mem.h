@@ -7,6 +7,8 @@
 class MemUnit {
     public:
         MemUnit();
+        void setProcess(int p);
+        int getProcess();
         void setDirty();
         bool getDirty();
         void setRef(bool x);
@@ -21,7 +23,9 @@ class MemUnit {
         void setTime();
         clock_t getTime();
         void setVirtual(int x);
+        int getVirtual();
     private:
+        int pro;
         int virt;
         bool dirty;
         bool ref;
