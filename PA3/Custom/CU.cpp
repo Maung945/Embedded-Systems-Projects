@@ -13,12 +13,14 @@ using namespace std;
 struct accessPriority {
     int process;
     int virtPage;
-    int access;
+    int count;
+    string type;
 };
 
 int checkMain(bool arr[]);
-int replacement(vector<MemUnit*> q, vector<accessPriority> p);
+int replacement(vector<MemUnit*> q, vector<accessPriority> b);
 void display(vector<Process> l, int pf, int args);
+void splitString(string start, int &p, int &a, string &t);
 bool compare(accessPriority &a, accessPriority &b);
 
 const int memSize = 32;
@@ -38,56 +40,43 @@ int main(int argc, char* argv[]){
     bool mainMem[memSize];
     vector<MemUnit*> memQueue;
     int accessCount = 0;
-    vector<accessPriority> priorityList;
+    vector<accessPriority> buffer;
 
     //Initialize the main memory to empty
     for (int i = 0; i < memSize; i++){
         mainMem[i]=false;
     }
 
-    //Generate priority list
-    if(file.is_open()){
-        while (getline(file, line)) {
-            istringstream iss(line);
-            string process, address, type;
-            int procNum, addr;
-            getline(iss, process, '\t');
-            getline(iss, address, '\t');
-            procNum = stoi(process);
-            addr = stoi(address);
-            addr = addr >> 9;
-            bool find = false;
-            for(accessPriority &ea : priorityList){
-                if(ea.process == procNum && ea.virtPage == addr){
-                    ea.access++;
-                    find = true;
-                    break;
-                }
-            }
-            if(!find){
-                accessPriority temp;
-                temp.access = 1;
-                temp.process = procNum;
-                temp.virtPage = addr;
-                priorityList.push_back(temp);
-            } 
-        }
-        file.close();
-        sort(priorityList.begin(), priorityList.end(), compare);
-    } else {
-        cout << "Unable to open file\n";
-    }
-
-    file.open(filename);
-
     //Read file
     if(file.is_open()){
-        while (getline(file, line)) {
+        for (int i = 0; i < 500; i++){
+            getline(file, line);
+            int procNum, addr;
+            string type;
+            splitString(line, procNum, addr, type);
+            accessPriority temp;
+            temp.process = procNum;
+            temp.virtPage = addr;
+            temp.type = type;
+            buffer.push_back(temp); 
+        }
+        while (buffer.size() > 0) { 
             index = -1;
             current = nullptr;
-            istringstream iss(line);
-            string process, address, type;
+            string type;
             int procNum, addr;
+            if(getline(file, line)){
+                splitString(line, procNum, addr, type);
+                accessPriority temp;
+                temp.process = procNum;
+                temp.virtPage = addr;
+                temp.type = type;
+                buffer.push_back(temp);
+            }
+            procNum = buffer.at(0).process;
+            addr = buffer.at(0).virtPage;
+            type = buffer.at(0).type;
+            buffer.erase(buffer.begin());
             accessCount++;
             if (accessCount > 200){
                 for(MemUnit *ea : memQueue){
@@ -95,13 +84,6 @@ int main(int argc, char* argv[]){
                 }
                 accessCount = 0;
             }
-            //Split line into individual parts
-            getline(iss, process, '\t');
-            getline(iss, address, '\t');
-            getline(iss, type, '\t');
-            procNum = stoi(process);
-            addr = stoi(address);
-            type = type[0];
             //check the process list for the process that was read 
             for(int i = 0; i < processes.size(); i++){
                 if(procNum == processes.at(i).getName()){
@@ -113,19 +95,10 @@ int main(int argc, char* argv[]){
                 processes.push_back(Process(procNum));
                 index = processes.size() - 1;
             }
-            //Create the virtual page number and get the physical address if it exists
-            int vpn = addr >> 9;
-            current = processes.at(index).getPage(vpn);
+            //Get the physical address if it exists
+            current = processes.at(index).getPage(addr);
             current->access();
             int phy = current->getPhyAddr();
-            //Update the priority list
-            for(accessPriority &ea : priorityList){
-                if(ea.process == procNum && ea.virtPage == vpn){
-                    ea.access--;
-                    break;
-                }
-            }
-            sort(priorityList.begin(), priorityList.end(), compare);
             //Check the main memory for an empty page
             if(phy < 0){
                 pageFaults++;
@@ -136,7 +109,7 @@ int main(int argc, char* argv[]){
                     mainMem[phy] = true;
                     memQueue.push_back(current);
                 } else { //If there are no empty pages a page needs to be replaced
-                    int victim = replacement(memQueue, priorityList); //This function implements the different algorithms
+                    int victim = replacement(memQueue, buffer); //This function implements the different algorithms
                     for(int i = 0; i < memQueue.size(); i++){
                         if(victim == memQueue.at(i)->getPhyAddr()){
                             memQueue.at(i)->replace();
@@ -157,9 +130,6 @@ int main(int argc, char* argv[]){
     } else {
         cout << "Unable to open file\n";
     }
-    for(accessPriority ea : priorityList){
-        cout << "Process: " << ea.process << " Page: " << ea.virtPage << " Accesses: " << ea.access << endl;
-    }
     display(processes, pageFaults, argc);
     return 0;
 }
@@ -173,26 +143,58 @@ int checkMain(bool arr[]){
     return -1;
 }
 
-int replacement(vector<MemUnit*> q, vector<accessPriority> p){
+int replacement(vector<MemUnit*> q, vector<accessPriority> b){
     //Different replacement algorithms go here
-    int priority = -1;
-    MemUnit *replace;
-    for (MemUnit *ea : q){
-        for(int i = 0; i < p.size(); i++){
-            if(p.at(i).process == ea->getProcess() && p.at(i).virtPage == ea->getVirtual()){
-                if(priority > -1){
-                    if (i < priority){
-                        priority = i;
-                        replace = ea;
-                    }
+    vector<accessPriority> countList;
+    bool found = false;
+    for(accessPriority e : b){
+        found = false;
+        for(accessPriority &counted : countList){
+            if(e.process == counted.process && e.virtPage == counted.virtPage){
+                counted.count++;
+                found = true;
+            }
+        }
+        if(!found){
+            accessPriority tmp;
+            tmp.count = 1;
+            tmp.process = e.process;
+            tmp.type = e.type;
+            tmp.virtPage = e.virtPage;
+            countList.push_back(tmp);
+        }
+    }
+    sort(countList.begin(), countList.end(), compare);
+    int currentIndex = -1;
+    MemUnit *selected;
+    bool foundAhead[memSize];
+    for(int j = 0; j < memSize; j++){
+        for(int i = 0; i < countList.size(); i++){
+            if(q.at(j)->getProcess() == countList.at(i).process && q.at(j)->getVirtual() == countList.at(i).virtPage){
+                foundAhead[j] = true;
+                if(currentIndex < 0){
+                    selected = q.at(j);
+                    currentIndex = i;
                 } else {
-                    priority = i;
-                    replace = ea;
+                    if(i < currentIndex){
+                        selected = q.at(j);
+                        currentIndex = i;
+                    }
                 }
             }
         }
     }
-    return replace->getPhyAddr();
+    for(int i = 0; i < memSize; i++){
+        if(!foundAhead[i]){
+            selected = q.at(i);
+            currentIndex = 1;
+            break;
+        }
+    }
+    if(currentIndex <0){
+        selected = q.at(0);
+    }
+    return selected->getPhyAddr();
 }
 
 void display(vector<Process> l, int pf, int args){
@@ -215,10 +217,22 @@ void display(vector<Process> l, int pf, int args){
     cout << "CU," << pf << "," << dw << "," << disk << endl;
 }
 
+void splitString(string start, int &p, int &a, string &t){
+    istringstream iss(start);
+    string process, address;
+    getline(iss, process, '\t');
+    getline(iss, address, '\t');
+    getline(iss, t, '\t');
+    p = stoi(process);
+    a = stoi(address);
+    t = t[0];
+    a = a >> 9;
+}
+
 bool compare(accessPriority &a, accessPriority &b){
-    if(a.access < b.access){
+    if(a.count < b.count){
         return true;
-    } else if( a.access == b.access){
+    } else if( a.count == b.count){
         if(a.virtPage > b.virtPage){
             return true;
         } 
