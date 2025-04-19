@@ -1,0 +1,6 @@
+Type,Page faults,Dirty writes,Total disk references
+Random,2534,2294,4828
+PER,2852,2553,5405
+LRU,2272,2062,4334
+FIFO,2279,2078,4357
+Custom,3777,3334,7111
