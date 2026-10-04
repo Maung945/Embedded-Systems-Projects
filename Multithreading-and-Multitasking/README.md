@@ -1,5 +1,5 @@
-#README for PA1
-#README for PA1
+# Multithreading and Multitasking
+
 # Project Overview
 
 This project consists of several C files each designed to handle specific aspects of a larger computation task using different methods such as single-thread execution, multithreading, and multitasking. Below is a description of each file and its corresponding part in the assignment.
